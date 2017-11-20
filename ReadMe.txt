@@ -21,12 +21,3 @@ Dependency: this software requires the bfmatlab toolbox to read stacks, availabl
 Developed by:
 Marcelo Cicconet
 marceloc.net
-
-
-@misc{VoxelClassifier2017,
-  author        = {M. Cicconet},
-  title         = {VoxelClassifier: a single-layer Random Forest model for voxel classification (volume segmentation).},
-  howpublished  = {https://github.com/HMS-IDAC/VoxelClassifier},
-  year          = {2017},
-  note          = {Matlab software}
-}
