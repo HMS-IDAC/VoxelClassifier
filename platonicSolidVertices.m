@@ -1,8 +1,8 @@
 function v = platonicSolidVertices(n,r)
 
 % n=1 -> Tetrahedron
-% n=2 -> Cube
-% n=3 -> Octahedron
+% n=2 -> Octahedron
+% n=3 -> Cube
 % n=4 -> Icosahedron
 % n=5 -> Dodecahedron
 %
