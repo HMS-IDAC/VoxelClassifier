@@ -5,6 +5,19 @@ clear, clc
 trainPath = '~/Workspace/DataForVC';
 % where volumes and labes are
 
+vResizeFactor = 1;
+% volume resize factor;
+% a factor smaller than 1 lowers computational cost and memory requirements,
+% at the expense of accuracy; but often this is a good trade-off
+
+zStretch = 1;
+% 3D volumes typically have the z dimension of the voxel size different
+% from the x and y dimensions;
+% this factor corresponds to how much the volume should be stretched in z
+% so that the voxel dimensions are the same in x, y, and z;
+% the factor is computed as follows:
+% zStretch = "voxel size in z" divided by "voxel size in x or y"
+
 sigmas = 2;
 % volume features are simply derivatives (up to second order) in different scales;
 % this parameter specifies such scales; details in volumeFeaturesP.m;
@@ -48,7 +61,7 @@ rfModelPath = '~/Workspace/model.mat';
 
 %% read volumes/labels
 
-[volumeList,labelList,labels] = parseLabelFolder(trainPath);
+[volumeList,labelList,labels] = parseLabelFolder(trainPath,vResizeFactor,zStretch);
 nLabels = length(labels);
 
 %% training samples cap
@@ -75,7 +88,7 @@ flatLbls = cell(1,nVolumes);
 nSamples = cell(1,nVolumes);
 if nVolumes > 1
     parfor vlIndex = 1:nVolumes
-        fprintf('flattening training example %d of %d\n', vlIndex, nVolumes);
+        fprintf('computing features from example %d of %d\n', vlIndex, nVolumes);
         F = volumeFeaturesP(volumeList{vlIndex},sigmas,offsets,osSigma,logSigmas,sfSigmas,sfIDs,false);
         L = labelList{vlIndex};
         [flatFeat,flatLbl] = flattenVolFeatAndLab(F,L);
@@ -85,7 +98,7 @@ if nVolumes > 1
     end
 else
     for vlIndex = 1:nVolumes
-        fprintf('flattening training example %d of %d\n', vlIndex, nVolumes);
+        fprintf('computing features from example %d of %d\n', vlIndex, nVolumes);
         F = volumeFeaturesP(volumeList{vlIndex},sigmas,offsets,osSigma,logSigmas,sfSigmas,sfIDs,true);
         L = labelList{vlIndex};
         [flatFeat,flatLbl] = flattenVolFeatAndLab(F,L);
@@ -121,6 +134,8 @@ fprintf('training time: %f s\n', toc);
 
 %% save model
 
+model.vResizeFactor = vResizeFactor;
+model.zStretch = zStretch;
 model.sigmas = sigmas;
 model.offsets = offsets;
 model.osSigma = osSigma;

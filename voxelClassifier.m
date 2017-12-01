@@ -23,8 +23,12 @@ nSubsets = 100;
 
 %% read volume/model
 
-V = volumeRead(path);
 load(rfModelPath);
+V = volumeRead(path);
+sizeV = size(V);
+V = imresize3(V,[round(model.vResizeFactor*size(V,1)),...
+                 round(model.vResizeFactor*size(V,2)),...
+                 round(model.vResizeFactor*model.zStretch*size(V,3))]);
 
 %% compute features
 
@@ -36,9 +40,14 @@ toc
 
 tic, disp('vlClassify')
 [vlL,classProbs] = vlClassify(F,model.treeBag,nSubsets);
+vlL = imresize3(vlL,sizeV,'nearest');
+vlP = zeros(sizeV(1),sizeV(2),sizeV(3),size(classProbs,4));
+for i = 1:size(classProbs,4)
+    vlP(:,:,:,i) = imresize3(classProbs(:,:,:,i),sizeV);
+end
 toc
 
 %% display
 
-PM = cat(3,classProbs(:,:,:,1),cat(3,classProbs(:,:,:,2),classProbs(:,:,:,3)));
+PM = cat(3,vlP(:,:,:,1),cat(3,vlP(:,:,:,2),vlP(:,:,:,3)));
 volumeViewer(PM)

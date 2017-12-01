@@ -1,4 +1,4 @@
-function [volumeList,labelList,classIndices] = parseLabelFolder(dirPath)
+function [volumeList,labelList,classIndices] = parseLabelFolder(dirPath,vResizeFactor,zStretch)
 
 files = dir(dirPath);
 
@@ -31,11 +31,15 @@ labelList = cell(1,nVolumes);
 parfor i = 1:nVolumes
     fprintf('parsing training example %d of %d\n', i, nVolumes);
     V = volumeRead(volumePaths{i});
+    V = imresize3(V,[round(vResizeFactor*size(V,1)),...
+                     round(vResizeFactor*size(V,2)),...
+                     round(vResizeFactor*zStretch*size(V,3))]);
     [imp,imn] = fileparts(volumePaths{i});
     L = uint8(zeros(size(V)));
     for j = 1:nClasses
-        classJ = volumeRead([imp filesep imn sprintf('_Class%d.tif',classIndices(j))]) > 0;
-        L(classJ) = j;
+        classJ = volumeRead([imp filesep imn sprintf('_Class%d.tif',classIndices(j))]);
+        classJ = imresize3(classJ,size(V),'nearest');
+        L(classJ > 0) = j;
     end
 
     volumeList{i} = V;
